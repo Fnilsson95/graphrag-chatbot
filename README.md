@@ -19,7 +19,7 @@ The chatbot was originally built for an industrial partner (kept anonymous) and 
 
 **Supervisor:** Antonia Welzel · **Examiner:** Gregory Gay
 
-The primary contribution of this thesis is the research, not the implementation. The thesis applies and evaluates a five-step NFR management framework (Habibullah et al.) during the development of a GraphRAG chatbot in a real industrial setting, using semi-structured interviews, three focus group sessions, and quantitative evaluation of the finished system with [BenchmarkQED](https://github.com/JohnSnowLabs/benchmarkqed). The chatbot was developed as an MVP to give the research a concrete, deployable artifact to study. On completion, the MVP was handed over to the industrial partner to be further developed and deployed as an in-product assistant for their existing users. The full thesis is included as [`Thesis.pdf`](Thesis.pdf).
+The primary contribution of this thesis is the research, not the implementation. The thesis applies and evaluates a five-step NFR management framework (Habibullah et al.) during the development of a GraphRAG chatbot in a real industrial setting, using semi-structured interviews, three focus group sessions, and quantitative evaluation of the finished system with [BenchmarkQED](https://github.com/microsoft/benchmark-qed). The chatbot was developed as an MVP to give the research a concrete, deployable artifact to study. On completion, the MVP was handed over to the industrial partner to be further developed and deployed as an in-product assistant for their existing users. The full thesis is included as [`Thesis.pdf`](Thesis.pdf).
 
 ## Why Kubernetes?
 
