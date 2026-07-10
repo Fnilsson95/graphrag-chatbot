@@ -1,0 +1,95 @@
+-Goal-
+Given an excerpt from the Kubernetes documentation and a list of entity types, identify all entities of those types from the text and all relationships among the identified entities. Kubernetes is a container orchestration platform for automating deployment, scaling, and management of containerised applications; the documentation describes workloads, controllers, networking resources, storage resources, configuration objects, and other cluster concepts.
+
+-Steps-
+1. Identify all entities. For each identified entity, extract the following information:
+- entity_name: Name of the entity, capitalized. Preserve the form used in the docs (e.g. "Deployment", "PersistentVolumeClaim", "ClusterIP").
+- entity_type: One of the following types: [{entity_types}]
+- entity_description: Comprehensive description of the entity's attributes, behavior, and role in Kubernetes
+Format each entity as ("entity"<|><entity_name><|><entity_type><|><entity_description>)
+
+2. From the entities identified in step 1, identify all pairs of (source_entity, target_entity) that are *clearly related* to each other.
+For each pair of related entities, extract the following information:
+- source_entity: name of the source entity, as identified in step 1
+- target_entity: name of the target entity, as identified in step 1
+- relationship_description: explanation as to why you think the source entity and the target entity are related to each other (e.g. "a Deployment manages a ReplicaSet", "a Service selects Pods by label", "a PVC binds to a PV")
+- relationship_strength: a numeric score indicating strength of the relationship between the source entity and target entity
+ Format each relationship as ("relationship"<|><source_entity><|><target_entity><|><relationship_description><|><relationship_strength>)
+
+3. Return output in English as a single list of all the entities and relationships identified in steps 1 and 2. Use **##** as the list delimiter.
+
+4. When finished, output <|COMPLETE|>
+
+######################
+-Examples-
+######################
+Example 1:
+Entity_types: workload, controller, resource
+Text:
+A Deployment manages a set of Pods running an application. You describe a desired state in a Deployment, and the Deployment controller changes the actual state to match. A Deployment creates a ReplicaSet, which in turn creates the Pods. If a Pod fails, the ReplicaSet creates a new one. A Deployment also supports rolling updates: changing the Pod template causes the Deployment to create a new ReplicaSet and gradually replace Pods from the old ReplicaSet while scaling it down.
+######################
+Output:
+("entity"<|>DEPLOYMENT<|>controller<|>A Deployment is a Kubernetes controller that manages a ReplicaSet to maintain a desired number of Pod replicas and supports rolling updates by gradually shifting replicas to a new ReplicaSet when the Pod template changes)
+##
+("entity"<|>REPLICASET<|>controller<|>A ReplicaSet is a Kubernetes controller that maintains a stable set of replica Pods at any given time; it is created and managed by a Deployment and replaces failed Pods automatically)
+##
+("entity"<|>POD<|>workload<|>A Pod is the smallest deployable unit in Kubernetes, representing a running instance of a containerised application, created by a ReplicaSet on behalf of a Deployment)
+##
+("relationship"<|>DEPLOYMENT<|>REPLICASET<|>A Deployment creates and manages a ReplicaSet to maintain the desired replica count<|>9)
+##
+("relationship"<|>REPLICASET<|>POD<|>A ReplicaSet creates and replaces Pods to match the desired replica count<|>9)
+##
+("relationship"<|>DEPLOYMENT<|>POD<|>A Deployment controls Pods indirectly via its ReplicaSet, orchestrating rolling updates by shifting replicas between old and new ReplicaSets<|>7)
+<|COMPLETE|>
+
+######################
+Example 2:
+Entity_types: networking, resource, configuration
+Text:
+A Service is an abstraction that exposes a set of Pods as a network service. A Service uses a label selector to identify which Pods it routes traffic to. The selected Pods' addresses are tracked in an Endpoints object that the control plane updates automatically as Pods come and go. An Ingress manages external HTTP and HTTPS access to Services, routing requests based on hostname and URL path rules.
+######################
+Output:
+("entity"<|>SERVICE<|>networking<|>A Service is a Kubernetes networking resource that provides a stable virtual IP and DNS name for a logical set of Pods, selected by a label selector)
+##
+("entity"<|>ENDPOINTS<|>resource<|>An Endpoints object tracks the IP addresses and ports of the Pods currently selected by a Service's label selector; it is updated automatically by the control plane as Pods are added or removed)
+##
+("entity"<|>INGRESS<|>networking<|>An Ingress is a Kubernetes resource that manages external HTTP and HTTPS routing to Services, matching requests by hostname and URL path)
+##
+("entity"<|>LABEL SELECTOR<|>configuration<|>A label selector is a key-value matching rule used by a Service to identify which Pods it targets)
+##
+("relationship"<|>SERVICE<|>ENDPOINTS<|>A Service's label selector determines the Pod addresses tracked in its Endpoints object<|>9)
+##
+("relationship"<|>SERVICE<|>LABEL SELECTOR<|>A Service uses a label selector to select the Pods it routes traffic to<|>9)
+##
+("relationship"<|>INGRESS<|>SERVICE<|>Ingress rules forward matched external HTTP/HTTPS traffic to a named Service and port<|>9)
+<|COMPLETE|>
+
+######################
+Example 3:
+Entity_types: storage, resource, configuration, workload
+Text:
+A PersistentVolume (PV) is a piece of storage in the cluster provisioned by an administrator or dynamically by a StorageClass. A PersistentVolumeClaim (PVC) is a request for storage by a user, specifying size and access mode. The control plane binds a PVC to a PV that satisfies the claim. Pods use PVCs by referencing the claim name in their volume spec. A StorageClass enables dynamic provisioning of PVs on demand when a PVC requests it.
+######################
+Output:
+("entity"<|>PERSISTENTVOLUME<|>storage<|>A PersistentVolume is a cluster-level storage resource with a lifecycle independent of any Pod, provisioned by an administrator or dynamically by a StorageClass)
+##
+("entity"<|>PERSISTENTVOLUMECLAIM<|>resource<|>A PersistentVolumeClaim is a user's request for storage that specifies size and access mode; the control plane binds it to a matching PersistentVolume)
+##
+("entity"<|>STORAGECLASS<|>configuration<|>A StorageClass defines a storage provisioner and parameters that enable dynamic provisioning of PersistentVolumes when a PVC is created)
+##
+("entity"<|>POD<|>workload<|>A Pod mounts storage by referencing a PersistentVolumeClaim by name in its volume spec, decoupling its definition from the underlying storage implementation)
+##
+("relationship"<|>PERSISTENTVOLUMECLAIM<|>PERSISTENTVOLUME<|>A PVC binds to a PV that satisfies its requested size and access mode<|>9)
+##
+("relationship"<|>STORAGECLASS<|>PERSISTENTVOLUME<|>A StorageClass dynamically provisions a new PersistentVolume when a PVC requests storage and no existing PV matches<|>8)
+##
+("relationship"<|>POD<|>PERSISTENTVOLUMECLAIM<|>A Pod references a PVC by name in its volume spec to mount cluster storage<|>9)
+<|COMPLETE|>
+
+######################
+-Real Data-
+######################
+Entity_types: {entity_types}
+Text: {input_text}
+######################
+Output:

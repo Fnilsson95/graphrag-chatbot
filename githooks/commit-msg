@@ -1,0 +1,22 @@
+#!/bin/sh
+
+commit_msg_file="$1"
+
+# Read the commit message
+commit_msg=$(cat "$commit_msg_file")
+
+# Require format: #<tickernumber> - <Uppercase> message
+pattern='^#[0-9][0-9]* - [A-Z].*'
+
+if ! printf '%s\n' "$commit_msg" | grep -Eq "$pattern"; then
+  echo "ERROR: Invalid commit message format."
+  echo "How to commit:"
+  echo "  Use:     #<tickernumber> - <Uppercase> message"
+  echo "  Example: #4 - Add githook"
+  echo
+  echo "Your commit was rejected. Please edit the message and try again."
+  exit 1
+fi
+
+exit 0
+

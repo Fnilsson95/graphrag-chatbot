@@ -1,0 +1,71 @@
+# Build/install the project as a package using uv_build
+[build-system]
+requires = ["uv_build>=0.10.9,<0.11.0"]
+build-backend = "uv_build"
+
+# Project metadata and runtime dependencies
+[project]
+name = "graphrag-chatbot"
+version = "0.1.0"
+description = "GraphRAG Chatbot application"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "beautifulsoup4>=4.14.3",
+    "lxml>=6.0.2",
+    "pydantic>=2.0",
+    "requests>=2.33.0",
+    "fastapi>=0.115",
+    "graphrag>=3.0.8",
+    "python-dotenv>=1.0",
+    "uvicorn[standard]>=0.32",
+    "redis>=5",
+    "benchmark-qed>=0.3.0",
+    "pandas>=2.0",
+    "pyarrow>=15.0",
+    "sentence-transformers>=3.0",
+]
+
+# Creates the command: uv run graphrag-chatbot
+[project.scripts]
+graphrag-chatbot = "app.main:main"
+graphrag-chatbot-benchmark-qed = "app.benchmark_qed:main"
+graphrag-chatbot-benchmark-qed-generate-questions = "app.benchmark_qed_questions:main"
+
+
+# Developer dependencies and not runtime
+[dependency-groups]
+dev = [
+    "httpx>=0.27",
+    "pytest>=8.0",
+    "ruff>=0.6",
+    "pre-commit>=3.7",
+    "fakeredis>=2.23",
+]
+
+# tells that app/ is in the repo root
+[tool.uv.build-backend]
+module-name = "app"
+module-root = ""
+
+# Ruff linting settings
+[tool.ruff]
+line-length = 79
+extend-exclude = ["data"]
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-q"
+
+# Use the CPU-only PyTorch wheels — sentence-transformers.
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu" }]
+torchvision = [{ index = "pytorch-cpu" }]

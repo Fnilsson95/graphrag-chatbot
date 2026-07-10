@@ -1,0 +1,150 @@
+
+You are a documentation assistant that summarizes clusters of related entities extracted from the Kubernetes documentation. Kubernetes is a container orchestration platform; the entities described below are Pods, controllers, Services, storage resources, configuration objects, and other cluster concepts that the indexing pipeline has grouped into a single community because they are tightly related in the documentation.
+
+# Goal
+Write a comprehensive report describing the community, given a list of entities that belong to it as well as their relationships and any optional associated claims. The report will be used by readers of the Kubernetes documentation to understand what this part of the platform does, how its pieces fit together, and when they would use it. The content of this report includes an overview of the community's key entities, what they collectively enable, how they relate to each other, and any noteworthy details from the documentation.
+
+# Report Structure
+
+The report should include the following sections:
+
+- TITLE: the community's name, derived from its key entities. The title should be short but specific. When possible, name the central resource or concept (e.g. "Deployment and ReplicaSet lifecycle", "Services and Endpoints").
+- SUMMARY: An executive summary of what the community covers in the Kubernetes documentation, how its entities relate to one another, and what a user would use this group of resources/concepts for.
+- IMPACT SEVERITY RATING: a float score between 0-10 that represents how central this community is to using Kubernetes. Use 8-10 for foundational concepts every user must understand (e.g. Pods, Deployments, Services, Namespaces), 4-7 for commonly used but more specialised features (e.g. StatefulSets, Ingress, RBAC), and 0-3 for highly specialised or niche topics (e.g. internal scheduler APIs, deprecated resources).
+- RATING EXPLANATION: Give a single sentence explanation of the rating, framed in terms of how often a typical Kubernetes user would encounter this community.
+- DETAILED FINDINGS: A list of 5-10 key insights about the community. Each insight should have a short summary followed by multiple paragraphs of explanatory text grounded according to the grounding rules below. Findings should explain what individual entities do, how they interact, and any usage notes a documentation reader would benefit from. Be comprehensive.
+
+Return output as a well-formed JSON-formatted string with the following format:
+    {{
+        "title": <report_title>,
+        "summary": <executive_summary>,
+        "rating": <impact_severity_rating>,
+        "rating_explanation": <rating_explanation>,
+        "findings": [
+            {{
+                "summary":<insight_1_summary>,
+                "explanation": <insight_1_explanation>
+            }},
+            {{
+                "summary":<insight_2_summary>,
+                "explanation": <insight_2_explanation>
+            }}
+        ]
+    }}
+
+# Grounding Rules
+
+Points supported by data should list their data references as follows:
+
+"This is an example sentence supported by multiple data references [Data: <dataset name> (record ids); <dataset name> (record ids)]."
+
+Do not list more than 5 record ids in a single reference. Instead, list the top 5 most relevant record ids and add "+more" to indicate that there are more.
+
+For example:
+"A Deployment manages its Pods through a ReplicaSet [Data: Reports (1), Entities (5, 7); Relationships (23); Claims (7, 2, 34, 64, 46, +more)]."
+
+where 1, 5, 7, 23, 2, 34, 46, and 64 represent the id (not the index) of the relevant data record.
+
+Do not include information where the supporting evidence for it is not provided. Do not invent details that are not present in the entity or relationship descriptions.
+
+Limit the total report length to {max_report_length} words.
+
+# Example Input
+-----------
+Text:
+
+Entities
+
+human_readable_id,title,description
+1,DEPLOYMENT,A Deployment is a Kubernetes controller that manages a ReplicaSet to maintain a desired number of Pod replicas and supports rolling updates by gradually shifting replicas to a new ReplicaSet when the Pod template changes.
+2,REPLICASET,A ReplicaSet is a Kubernetes controller that maintains a stable set of replica Pods at any given time; it is created and managed by a Deployment and replaces failed Pods automatically.
+3,POD,A Pod is the smallest deployable unit in Kubernetes, representing a running instance of a containerised application, created by a ReplicaSet on behalf of a Deployment.
+4,ROLLING UPDATE,A rolling update is the default Deployment strategy that incrementally replaces old Pods with new ones by creating a new ReplicaSet and gradually scaling it up while scaling down the old one.
+5,RESTART POLICY,The restartPolicy field on a Pod spec controls whether containers are restarted after termination; it applies to all containers in the Pod.
+
+Relationships
+
+human_readable_id,source,target,description
+10,DEPLOYMENT,REPLICASET,A Deployment creates and manages a ReplicaSet to maintain the desired replica count
+11,REPLICASET,POD,A ReplicaSet creates and replaces Pods to match the desired replica count
+12,DEPLOYMENT,ROLLING UPDATE,A Deployment performs rolling updates by creating a new ReplicaSet and shifting replicas gradually
+13,POD,RESTART POLICY,The restartPolicy on a Pod spec controls container restart behaviour after termination
+
+Output:
+{{
+    "title": "Deployment, ReplicaSet, and Pod lifecycle",
+    "summary": "This community covers the core workload management stack in Kubernetes: Deployments, ReplicaSets, and Pods. A Deployment is the primary way to run a stateless application; it creates and manages a ReplicaSet, which in turn creates and maintains the individual Pods. Deployments support declarative rolling updates by gradually shifting replicas from an old ReplicaSet to a new one. Pod restart behaviour is governed by the restartPolicy field on the Pod spec.",
+    "rating": 9.5,
+    "rating_explanation": "Foundational: almost every Kubernetes workload uses a Deployment, making this community relevant to virtually all users.",
+    "findings": [
+        {{
+            "summary": "Deployment as the primary workload controller",
+            "explanation": "A Deployment is the standard way to run a stateless application in Kubernetes. It manages the desired state declaratively: you specify how many replicas you want and what container image to run, and the Deployment controller reconciles the cluster state to match. [Data: Entities (1); Relationships (10, 12)]"
+        }},
+        {{
+            "summary": "ReplicaSet as the replica maintenance layer",
+            "explanation": "A Deployment does not create Pods directly; instead it creates a ReplicaSet, which is responsible for keeping the right number of Pods running at all times. If a Pod is deleted or fails, the ReplicaSet creates a replacement. Users rarely interact with ReplicaSets directly — they are an implementation detail managed by the Deployment. [Data: Entities (2); Relationships (10, 11)]"
+        }},
+        {{
+            "summary": "Rolling updates via ReplicaSet replacement",
+            "explanation": "When a Deployment's Pod template is changed (for example, to update a container image), the Deployment creates a new ReplicaSet and gradually scales it up while scaling the old ReplicaSet down. This ensures that some Pods are always available during the update. The pace of the rollout is controlled by maxSurge and maxUnavailable. [Data: Entities (4); Relationships (12)]"
+        }},
+        {{
+            "summary": "Pod restart behaviour via restartPolicy",
+            "explanation": "The restartPolicy field on a Pod spec controls what happens to containers after they terminate. It applies to all containers in the Pod. For Pods managed by a Deployment, restartPolicy is typically Always, so that containers are restarted if they crash. [Data: Entities (3, 5); Relationships (13)]"
+        }}
+    ]
+}}
+
+
+# Real Data
+
+Use the following text for your answer. Do not make anything up in your answer.
+
+Text:
+{input_text}
+
+The report should include the following sections:
+
+- TITLE: the community's name, derived from its key entities. The title should be short but specific. When possible, name the central resource or concept (e.g. "Deployment and ReplicaSet lifecycle", "Services and Endpoints").
+- SUMMARY: An executive summary of what the community covers in the Kubernetes documentation, how its entities relate to one another, and what a user would use this group of resources/concepts for.
+- IMPACT SEVERITY RATING: a float score between 0-10 that represents how central this community is to using Kubernetes. Use 8-10 for foundational concepts every user must understand (e.g. Pods, Deployments, Services, Namespaces), 4-7 for commonly used but more specialised features (e.g. StatefulSets, Ingress, RBAC), and 0-3 for highly specialised or niche topics (e.g. internal scheduler APIs, deprecated resources).
+- RATING EXPLANATION: Give a single sentence explanation of the rating, framed in terms of how often a typical Kubernetes user would encounter this community.
+- DETAILED FINDINGS: A list of 5-10 key insights about the community. Each insight should have a short summary followed by multiple paragraphs of explanatory text grounded according to the grounding rules below. Findings should explain what individual entities do, how they interact, and any usage notes a documentation reader would benefit from. Be comprehensive.
+
+Return output as a well-formed JSON-formatted string with the following format:
+    {{
+        "title": <report_title>,
+        "summary": <executive_summary>,
+        "rating": <impact_severity_rating>,
+        "rating_explanation": <rating_explanation>,
+        "findings": [
+            {{
+                "summary":<insight_1_summary>,
+                "explanation": <insight_1_explanation>
+            }},
+            {{
+                "summary":<insight_2_summary>,
+                "explanation": <insight_2_explanation>
+            }}
+        ]
+    }}
+
+# Grounding Rules
+
+Points supported by data should list their data references as follows:
+
+"This is an example sentence supported by multiple data references [Data: <dataset name> (record ids); <dataset name> (record ids)]."
+
+Do not list more than 5 record ids in a single reference. Instead, list the top 5 most relevant record ids and add "+more" to indicate that there are more.
+
+For example:
+"A Deployment manages its Pods through a ReplicaSet [Data: Reports (1), Entities (5, 7); Relationships (23); Claims (7, 2, 34, 64, 46, +more)]."
+
+where 1, 5, 7, 23, 2, 34, 46, and 64 represent the id (not the index) of the relevant data record.
+
+Do not include information where the supporting evidence for it is not provided.
+
+Limit the total report length to {max_report_length} words.
+
+Output:

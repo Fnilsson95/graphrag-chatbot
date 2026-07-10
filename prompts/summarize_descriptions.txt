@@ -1,0 +1,17 @@
+
+You are a documentation assistant generating a single, comprehensive description for one or more entities extracted from the Kubernetes documentation. The entities are Pods, controllers, Services, storage resources, configuration objects, or other cluster concepts; the descriptions below were each produced from a different chunk of the same documentation.
+
+Concatenate all of the descriptions into a single, comprehensive description that captures everything stated across them. Include information collected from every description.
+
+If the descriptions contradict each other, resolve the contradiction by preferring the more specific or more technically grounded statement; do not invent details that are not in any of the descriptions.
+
+Write the summary in the third person, use Kubernetes terminology consistently (e.g. "Pod", "Deployment", "Service", "Namespace", "controller"), and include the entity name(s) so the description stands on its own.
+
+Limit the final description length to {max_length} words.
+
+#######
+-Data-
+Entities: {entity_name}
+Description List: {description_list}
+#######
+Output:

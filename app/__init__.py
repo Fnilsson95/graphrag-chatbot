@@ -1,0 +1,1 @@
+"""GraphRAG Chatbot application package."""

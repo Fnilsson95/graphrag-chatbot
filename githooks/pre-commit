@@ -1,0 +1,29 @@
+#!/bin/sh
+
+set -e
+
+# Stop the commit if uv is not installed
+if ! command -v uv >/dev/null 2>&1; then
+  echo "ERROR: uv is required but not installed."
+  echo "Install uv first, then run: uv sync"
+  exit 1
+fi
+
+# run pre-commit inside uv environemnt
+uv run -- pre-commit run --hook-stage pre-commit
+rc=$?
+
+if [ "$rc" -ne 0 ]; then
+  changed_files="$(git diff --name-only)"
+  if [ -n "$changed_files" ]; then
+    echo
+    echo "Some files were auto-fixed/reformatted and must be re-staged:"
+    printf '%s\n' "$changed_files" | sed 's/^/  - /'
+    echo
+    echo "Re-stage with:"
+    echo "  git add $(printf '%s\n' "$changed_files" | tr '\n' ' ')"
+  fi
+fi
+
+exit "$rc"
+

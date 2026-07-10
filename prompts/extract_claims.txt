@@ -1,0 +1,53 @@
+-Target activity-
+You are an intelligent assistant that helps build a knowledge base about Kubernetes, a container orchestration platform for automating deployment, scaling, and management of containerised applications. You extract documented facts and constraints ("claims") about Kubernetes resources and concepts (such as Pods, Deployments, Services, ConfigMaps, Volumes, and other cluster objects) from its official documentation.
+
+-Goal-
+Given a documentation excerpt that is potentially relevant to this activity, an entity specification, and a claim description, extract all entities that match the entity specification and all claims about those entities that are stated in the documentation.
+
+-Steps-
+1. Extract all named entities that match the predefined entity specification. Entity specification can either be a list of entity names or a list of entity types.
+2. For each entity identified in step 1, extract all claims associated with the entity. Claims need to match the specified claim description, and the entity should be the subject of the claim.
+For each claim, extract the following information:
+- Subject: name of the entity that is subject of the claim, capitalized. The subject entity is the one the documented fact is about. Subject needs to be one of the named entities identified in step 1.
+- Object: name of the entity that the claim relates to (for example, a resource type a controller manages, or another resource it depends on), capitalized. If there is no related entity, use **NONE**.
+- Claim Type: overall category of the claim, capitalized. Name it in a way that can be repeated across multiple text inputs, so that similar claims share the same claim type (for example, SCHEDULING CONSTRAINT, ACCESS MODE, LIFECYCLE RULE, SUPPORTED TYPE).
+- Claim Status: **TRUE**, **FALSE**, or **SUSPECTED**. TRUE means the documentation states it directly, SUSPECTED means it is implied but not explicitly stated, FALSE means the documentation states it does not hold.
+- Claim Description: Detailed description explaining the claim, together with all the related evidence and references from the documentation.
+- Claim Date: Period (start_date, end_date) when the claim was made. Documentation rarely states dates; if no date is given, return **NONE**. Use ISO-8601 format when a version or date is explicitly given.
+- Claim Source Text: List of **all** quotes from the original documentation text that are relevant to the claim.
+
+Format each claim as (<subject_entity><|><object_entity><|><claim_type><|><claim_status><|><claim_start_date><|><claim_end_date><|><claim_description><|><claim_source>)
+
+3. Return output in English as a single list of all the claims identified in steps 1 and 2. Use **##** as the list delimiter.
+
+4. When finished, output <|COMPLETE|>
+
+-Examples-
+Example 1:
+Entity specification: resource
+Claim description: requirements and constraints of a Kubernetes resource
+Text: A Pod can request CPU and memory resources for each container using the resources.requests field. The scheduler uses these requests to decide which Node to place the Pod on. If a container exceeds its memory limit, it is terminated and may be restarted depending on the restartPolicy.
+Output:
+
+(POD<|>NODE<|>SCHEDULING CONSTRAINT<|>TRUE<|>NONE<|>NONE<|>The Pod's resource requests determine which Node the scheduler selects for placement<|>The scheduler uses these requests to decide which Node to place the Pod on.)
+##
+(CONTAINER<|>NONE<|>TERMINATION CONDITION<|>TRUE<|>NONE<|>NONE<|>A container that exceeds its memory limit is terminated and may be restarted depending on the Pod's restartPolicy<|>If a container exceeds its memory limit, it is terminated and may be restarted depending on the restartPolicy.)
+<|COMPLETE|>
+
+Example 2:
+Entity specification: Deployment, Service
+Claim description: documented constraints and behaviors
+Text: A Deployment ensures the desired number of Pod replicas are running at all times. A Service of type ClusterIP is only reachable from within the cluster and is the default Service type when no type is specified.
+Output:
+
+(DEPLOYMENT<|>NONE<|>AVAILABILITY GUARANTEE<|>TRUE<|>NONE<|>NONE<|>A Deployment ensures the desired number of replica Pods are running at all times<|>A Deployment ensures the desired number of Pod replicas are running at all times.)
+##
+(SERVICE<|>NONE<|>ACCESS CONSTRAINT<|>TRUE<|>NONE<|>NONE<|>A ClusterIP Service is only reachable from within the cluster and is the default type when no type is specified<|>A Service of type ClusterIP is only reachable from within the cluster and is the default Service type when no type is specified.)
+<|COMPLETE|>
+
+-Real Data-
+Use the following input for your answer.
+Entity specification: {entity_specs}
+Claim description: {claim_description}
+Text: {input_text}
+Output:

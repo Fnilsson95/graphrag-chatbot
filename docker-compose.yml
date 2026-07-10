@@ -1,0 +1,48 @@
+services:
+  app:
+    build: .
+    container_name: graphrag-chatbot-app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      GRAPHRAG_ROOT: /app
+      GRAPHRAG_QUERY_METHOD: local
+      GRAPHRAG_DATA_DIR: /app/output
+      REDIS_URL: redis://redis:6379/0
+      SEMANTIC_CACHE_ENABLED: "true"
+    volumes:
+      - .:/app
+      - graphrag-chatbot_venv:/app/.venv
+      - ./input:/app/input:ro
+      - ./output:/app/output
+      - ./cache:/app/cache
+      - graphrag-chatbot_logs:/app/logs
+    command: uv run graphrag-chatbot
+    depends_on:
+      - redis
+
+  redis:
+    image: redis/redis-stack-server:7.4.0-v0
+    container_name: graphrag-chatbot-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - graphrag-chatbot_redis_data:/data
+
+  # Opt-in: only starts when invoked with `--profile scrape` or
+  # `docker compose run scraper`. Excluded from the default `up`.
+  scraper:
+    build: .
+    profiles: ["scrape"]
+    volumes:
+      - .:/app
+    command: uv run python data/scraper.py
+
+volumes:
+  graphrag-chatbot_logs:
+  graphrag-chatbot_redis_data:
+  graphrag-chatbot_venv:
