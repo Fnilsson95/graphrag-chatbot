@@ -3,7 +3,7 @@
 ![Python](https://img.shields.io/badge/python-3.12+-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-green)
 ![License](https://img.shields.io/badge/license-MIT-blue)
-![CI](https://github.com/YOUR_USERNAME/YOUR_REPO/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/Fnilsson95/graphrag-chatbot/actions/workflows/ci.yml/badge.svg)
 
 A GraphRAG-based documentation chatbot built on [Microsoft's open-source GraphRAG](https://github.com/microsoft/graphrag). Developed as a bachelor's thesis project at the University of Gothenburg / Chalmers University of Technology, the core research focused on applying and evaluating a structured non-functional requirements (NFR) management framework during the development of an ML-based system. The chatbot itself was built as an MVP artifact of that research process. Upon completion, the MVP was handed over to the industrial partner for further development and is being integrated into their software as an in-product assistant for their existing user base.
 
