@@ -28,7 +28,6 @@ _DEFAULT_RESPONSE_TYPE = (
 )
 
 
-
 @dataclass(frozen=True, slots=True)
 class QuerySettings:
     """Paths, search mode, and tuning for one query."""
