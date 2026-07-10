@@ -16,13 +16,15 @@ def test_strip_data_references_removes_graphrag_citations() -> None:
     answer = (
         "A data source node manages data origins "
         "[Data: Entities (72, 266, 1572); Relationships (1466, +more)]. "
-        "See the [Kubernetes documentation](https://kubernetes.io/docs/concepts/) "
+        "See the [Kubernetes documentation]"
+        "(https://kubernetes.io/docs/concepts/) "
         "for details [Data: Sources (1)]."
     )
 
     assert _strip_data_references(answer) == (
         "A data source node manages data origins. "
-        "See the [Kubernetes documentation](https://kubernetes.io/docs/concepts/) "
+        "See the [Kubernetes documentation]"
+        "(https://kubernetes.io/docs/concepts/) "
         "for details."
     )
 

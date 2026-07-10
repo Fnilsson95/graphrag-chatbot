@@ -27,7 +27,8 @@ class _AssertionQuestion:
 
 def _stable_id(text: str) -> str:
     # Deterministic question id so re-runs produce the same BenchmarkQED ids.
-    return str(uuid.uuid5(uuid.NAMESPACE_URL, f"graphrag-chatbot-benchmark-qed:{text}"))
+    namespace = f"graphrag-chatbot-benchmark-qed:{text}"
+    return str(uuid.uuid5(uuid.NAMESPACE_URL, namespace))
 
 
 def _read_parquet_titles(
