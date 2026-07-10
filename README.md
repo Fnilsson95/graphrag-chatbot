@@ -25,6 +25,10 @@ The primary contribution of this thesis is the research, not the implementation.
 
 The original chatbot was trained on proprietary documentation from an anonymous industrial partner. To make this repository public and runnable by anyone, the scraper and prompts have been reconfigured to index the Kubernetes concepts documentation, a well-structured, freely available corpus that exercises the same GraphRAG pipeline. The architecture, prompts, pipeline, and evaluation workflow are identical to the original system, only the target documentation has changed. Pointing the chatbot at a different documentation set requires updating `TARGET_SITE` in `data/scraper.py`, re-running the scraper and `graphrag index`, and updating the domain-specific terminology in `prompts/`.
 
+## Short Demo
+
+<video src="https://github.com/user-attachments/assets/81ddafb5-9150-429b-8337-224bbc8e1dea" controls width="100%"></video>
+
 ## Table of contents
 
 - [How it works](#how-it-works)
